@@ -6,88 +6,78 @@
             Jadwal Periksa
         </h2>
 
-        <a href="{{ route('jadwal-periksa.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5
-                  bg-primary hover:bg-primary/90
-                  text-white text-sm font-semibold
-                  rounded-xl transition">
-            <i class="fas fa-plus text-xs"></i>
-            Tambah Jadwal
+        <a href="{{ route('jadwal-periksa.create') }}" class="btn bg-[#2d4499] hover:bg-[#1e2d6b] 
+                  text-white border-none rounded-lg px-5">
+            <i class="fas fa-plus"></i>
+            Tambah Jadwal Periksa
         </a>
     </div>
 
+    {{-- Alert Flash Message --}}
+    @if (session('message'))
+    <div class="alert alert-{{ session('type', 'success') }} alert-dismissible mb-4 rounded-xl shadow-sm" role="alert">
+        <i class="fas fa-circle-check"></i>
+        <span>{{ session('message') }}</span>
+    </div>
+    @endif
+
     {{-- Card --}}
-    <div class="card bg-base-100 shadow-md rounded-2xl border border-slate-200">
+    <div class="card bg-base-100 shadow-md rounded-2 border">
         <div class="card-body p-0">
 
             <div class="overflow-x-auto">
-                <table class="table w-full">
+                <table class="table table-zebra w-full">
 
-                    {{-- Table Head --}}
-                    <thead class="bg-slate-50 text-slate-500 uppercase text-xs tracking-wider">
+                    {{-- Head --}}
+                    <thead class="bg-slate-100 text-slate-500 text-xs uppercase tracking-wider">
                         <tr>
-                            <th class="px-6 py-4 w-16">No</th>
+                            <th class="px-6 py-4">ID</th>
                             <th class="px-6 py-4">Hari</th>
                             <th class="px-6 py-4">Jam Mulai</th>
                             <th class="px-6 py-4">Jam Selesai</th>
-                            <th class="px-6 py-4 text-center">Status</th>
                             <th class="px-6 py-4 text-right">Aksi</th>
                         </tr>
                     </thead>
 
-                    {{-- Table Body --}}
-                    <tbody class="text-sm text-slate-700">
-                        @forelse($jadwals as $jadwal)
-                        <tr class="border-t border-slate-100 hover:bg-slate-50 transition">
+                    {{-- Body --}}
+                    <tbody>
+                        @forelse ($jadwalPeriksas as $jadwalPeriksa)
+                        <tr class="hover:bg-slate-50 transition">
 
                             <td class="px-6 py-4 text-slate-500">
-                                {{ $loop->iteration }}
+                                {{ $jadwalPeriksa->id }}
                             </td>
 
                             <td class="px-6 py-4 font-semibold text-slate-800">
-                                <span class="inline-flex items-center gap-2">
-                                    <i class="fas fa-calendar-day text-indigo-500 text-xs"></i>
-                                    {{ $jadwal->hari }}
-                                </span>
+                                {{ $jadwalPeriksa->hari }}
                             </td>
 
-                            <td class="px-6 py-4 text-slate-600">
-                                {{ date('H:i', strtotime($jadwal->jam_mulai)) }} WIB
+                            <td class="px-6 py-4 text-slate-500">
+                                {{ \Carbon\Carbon::parse($jadwalPeriksa->jam_mulai)->format('H:i') }}
                             </td>
 
-                            <td class="px-6 py-4 text-slate-600">
-                                {{ date('H:i', strtotime($jadwal->jam_selesai)) }} WIB
-                            </td>
-
-                            <td class="px-6 py-4 text-center">
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                    Aktif
-                                </span>
+                            <td class="px-6 py-4 text-slate-500">
+                                {{ \Carbon\Carbon::parse($jadwalPeriksa->jam_selesai)->format('H:i') }}
                             </td>
 
                             <td class="px-6 py-4 text-right">
                                 <div class="flex justify-end gap-2">
 
                                     {{-- Edit --}}
-                                    <a href="{{ route('jadwal-periksa.edit', $jadwal->id) }}" class="inline-flex items-center gap-1 px-4 py-2
-                                              bg-amber-500 hover:bg-amber-600
-                                              text-white text-xs font-semibold
-                                              rounded-lg transition">
-                                        <i class="fas fa-pen text-xs"></i>
+                                    <a href="{{ route('jadwal-periksa.edit', $jadwalPeriksa->id) }}" class="btn btn-sm bg-amber-500 hover:bg-amber-600 
+                                                  text-white border-none rounded-lg px-4">
+                                        <i class="fas fa-pen-to-square"></i>
                                         Edit
                                     </a>
 
                                     {{-- Delete --}}
-                                    <form action="{{ route('jadwal-periksa.destroy', $jadwal->id) }}" method="POST">
+                                    <form action="{{ route('jadwal-periksa.destroy', $jadwalPeriksa->id) }}" method="POST" style="display: inline-block;">
                                         @csrf
                                         @method('DELETE')
-
                                         <button type="submit"
-                                            onclick="return confirm('Yakin ingin menghapus jadwal periksa ini?')" class="inline-flex items-center gap-1 px-4 py-2
-                                                   bg-red-500 hover:bg-red-600
-                                                   text-white text-xs font-semibold
-                                                   rounded-lg transition">
-                                            <i class="fas fa-trash text-xs"></i>
+                                            onclick="return confirm('Yakin ingin menghapus Data Jadwal Periksa ini?')" class="btn btn-sm bg-red-500 hover:bg-red-600 
+                                                       text-white border-none rounded-lg px-4">
+                                            <i class="fas fa-trash"></i>
                                             Hapus
                                         </button>
                                     </form>
@@ -97,13 +87,15 @@
 
                         </tr>
                         @empty
-                        <tr>
-                            <td colspan="6" class="text-center py-12 text-slate-400">
-                                <i class="fas fa-calendar-xmark text-3xl mb-3 block"></i>
-                                Belum ada jadwal periksa
-                            </td>
-                        </tr>
-                        @endforelse
+<tr>
+    <td colspan="5" class="text-center py-14 text-slate-400">
+        <div class="flex flex-col items-center justify-center gap-2">
+            <i class="fas fa-inbox text-3xl"></i>
+            <span>Belum ada Jadwal Periksa</span>
+        </div>
+    </td>
+</tr>
+@endforelse
                     </tbody>
 
                 </table>
@@ -111,5 +103,16 @@
 
         </div>
     </div>
+
+    <script>
+        setTimeout(() => {
+            const alert = document.querySelector('.alert');
+            if (alert) {
+                alert.classList.remove('show');
+                alert.classList.add('fade');
+                setTimeout(() => alert.remove(), 500);
+            }
+        }, 2000);
+    </script>
 
 </x-layouts.app>

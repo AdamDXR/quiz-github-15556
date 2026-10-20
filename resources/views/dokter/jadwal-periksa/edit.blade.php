@@ -2,9 +2,9 @@
 
     {{-- Header --}}
     <div class="flex items-center gap-3 mb-6">
-        <a href="{{ route('jadwal-periksa.index') }}" class="flex items-center justify-center w-9 h-9 rounded-lg 
-                  bg-slate-100 hover:bg-slate-200 
-                  text-slate-600 transition">
+        <a href="{{ route('jadwal-periksa.index') }}" class="inline-flex items-center justify-center w-9 h-9 
+                  rounded-lg bg-slate-100 text-slate-500 
+                  hover:bg-slate-200 transition">
             <i class="fas fa-arrow-left text-sm"></i>
         </a>
 
@@ -16,83 +16,85 @@
     {{-- Card --}}
     <div class="card bg-base-100 shadow-md rounded-2xl border border-slate-200">
         <div class="card-body p-8">
-
-            <form action="{{ route('jadwal-periksa.update', $jadwal->id) }}" method="POST">
+            <form action="{{ route('jadwal-periksa.update', $jadwalPeriksa->id) }}" method="POST">
                 @csrf
                 @method('PUT')
 
-                <div class="space-y-6 mb-8">
+                {{-- Hari --}}
+                <div class="form-control mb-6">
+                    <label class="label pb-1">
+                        <span class="text-sm font-semibold text-gray-700">
+                            Hari <span class="text-red-500">*</span>
+                        </span>
+                    </label>
 
-                    {{-- Hari --}}
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">
-                            Hari Praktik <span class="text-red-500">*</span>
-                        </label>
-                        <select name="hari"
-                            class="w-full px-4 py-2 rounded-lg border-2 border-slate-300 bg-white focus:border-primary focus:outline-none @error('hari') border-red-500 @enderror"
-                            required>
-                            @foreach($hariList as $hari)
-                            <option value="{{ $hari }}" {{ old('hari', $jadwal->hari) == $hari ? 'selected' : '' }}>
-                                {{ $hari }}
+                    <select name="hari" id="hari"
+                        class="select select-bordered border-2 px-4 w-full rounded-lg @error('hari') select-error @enderror"
+                        required>
+                        <option value="">Pilih Hari</option>
+                        @foreach (['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'] as $day)
+                            <option value="{{ $day }}" {{ (old('hari') ?? $jadwalPeriksa->hari) == $day ? 'selected' : '' }}>
+                                {{ $day }}
                             </option>
-                            @endforeach
-                        </select>
-                        @error('hari')
-                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
+                        @endforeach
+                    </select>
 
-                    {{-- Jam Mulai & Jam Selesai Grid --}}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    @error('hari')
+                    <span class="text-xs text-red-500 mt-1">{{ $message }}</span>
+                    @enderror
+                </div>
 
-                        {{-- Jam Mulai --}}
-                        <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-1">
-                                Jam Mulai <span class="text-red-500">*</span>
-                            </label>
-                            <input type="time" name="jam_mulai"
-                                value="{{ old('jam_mulai', date('H:i', strtotime($jadwal->jam_mulai))) }}"
-                                class="w-full px-4 py-2 rounded-lg border-2 border-slate-300 focus:border-primary focus:outline-none @error('jam_mulai') border-red-500 @enderror"
-                                required>
-                            @error('jam_mulai')
-                            <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                {{-- Jam Mulai --}}
+                <div class="form-control mb-6">
+                    <label class="label pb-1">
+                        <span class="text-sm font-semibold text-gray-700">
+                            Jam Mulai <span class="text-red-500">*</span>
+                        </span>
+                    </label>
 
-                        {{-- Jam Selesai --}}
-                        <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-1">
-                                Jam Selesai <span class="text-red-500">*</span>
-                            </label>
-                            <input type="time" name="jam_selesai"
-                                value="{{ old('jam_selesai', date('H:i', strtotime($jadwal->jam_selesai))) }}"
-                                class="w-full px-4 py-2 rounded-lg border-2 border-slate-300 focus:border-primary focus:outline-none @error('jam_selesai') border-red-500 @enderror"
-                                required>
-                            @error('jam_selesai')
-                            <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                    <input type="time" name="jam_mulai" id="jam_mulai"
+                        value="{{ old('jam_mulai') ?? $jadwalPeriksa->jam_mulai }}"
+                        class="input input-bordered border-2 px-4 w-full rounded-lg @error('jam_mulai') input-error @enderror"
+                        required>
 
-                    </div>
+                    @error('jam_mulai')
+                    <span class="text-xs text-red-500 mt-1">{{ $message }}</span>
+                    @enderror
+                </div>
 
+                {{-- Jam Selesai --}}
+                <div class="form-control mb-8">
+                    <label class="label pb-1">
+                        <span class="text-sm font-semibold text-gray-700">
+                            Jam Selesai <span class="text-red-500">*</span>
+                        </span>
+                    </label>
+
+                    <input type="time" name="jam_selesai" id="jam_selesai"
+                        value="{{ old('jam_selesai') ?? $jadwalPeriksa->jam_selesai }}"
+                        class="input input-bordered border-2 px-4 w-full rounded-lg @error('jam_selesai') input-error @enderror"
+                        required>
+
+                    @error('jam_selesai')
+                    <span class="text-xs text-red-500 mt-1">{{ $message }}</span>
+                    @enderror
                 </div>
 
                 {{-- Buttons --}}
                 <div class="flex gap-3">
-                    <button type="submit"
-                        class="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary/90 
-                               text-white font-semibold text-sm transition">
-                        <i class="fas fa-save mr-1"></i> Update
+                    <button type="submit" class="btn bg-[#2d4499] hover:bg-[#1e2d6b]
+                                   text-white border-none rounded-lg px-6">
+                        <i class="fas fa-save"></i>
+                        Simpan
                     </button>
 
-                    <a href="{{ route('jadwal-periksa.index') }}"
-                        class="px-6 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 
-                               text-slate-600 font-semibold text-sm transition">
+                    <a href="{{ route('jadwal-periksa.index') }}" class="btn btn-ghost bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-lg px-6">
                         Batal
                     </a>
                 </div>
 
             </form>
+
         </div>
     </div>
 
