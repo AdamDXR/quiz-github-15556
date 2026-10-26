@@ -144,6 +144,19 @@
     </div>
 
 
+        {{-- ================= AKUN / PROFILE ================= --}}
+        <p class="text-xs uppercase tracking-widest text-indigo-400 px-3 mb-3 mt-6">
+            Pengaturan
+        </p>
+
+        <div class="space-y-1 mb-4">
+            <a href="{{ route('profile.edit') }}"
+                class="{{ $baseLink }} {{ request()->routeIs('profile.*') ? $active : $inactive }}">
+                <i class="fas fa-user-gear w-4 text-center"></i>
+                Profil & Password
+            </a>
+        </div>
+
     {{-- ================= LOGOUT ================= --}}
     <div class="p-4 border-t border-white/10">
         <form method="POST" action="/logout">

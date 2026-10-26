@@ -16,6 +16,7 @@ use App\Http\Controllers\Dokter\RiwayatPasienController;
 
 // Pasien
 use App\Http\Controllers\Pasien\PoliController;
+use App\Http\Controllers\ProfileController;
 
 
 Route::get('/', function () {
@@ -67,5 +68,10 @@ Route::middleware(['auth', 'role:pasien'])->prefix('pasien')->group(function () 
 
     Route::post('/daftar', [PoliController::class, 'submit'])
         ->name('pasien.daftar.submit');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 });
 
