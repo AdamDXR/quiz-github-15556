@@ -16,6 +16,7 @@ use App\Http\Controllers\Dokter\RiwayatPasienController;
 
 // Pasien
 use App\Http\Controllers\Pasien\PoliController;
+use App\Http\Controllers\Pasien\RiwayatController;
 use App\Http\Controllers\ProfileController;
 
 
@@ -68,6 +69,9 @@ Route::middleware(['auth', 'role:pasien'])->prefix('pasien')->group(function () 
 
     Route::post('/daftar', [PoliController::class, 'submit'])
         ->name('pasien.daftar.submit');
+
+    Route::get('/riwayat-poli', [RiwayatController::class, 'index'])->name('pasien.riwayat.index');
+    Route::get('/riwayat-poli/{id}', [RiwayatController::class, 'show'])->name('pasien.riwayat.show');
 });
 
 Route::middleware('auth')->group(function () {
