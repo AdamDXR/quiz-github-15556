@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Pasien;
 
 use App\Http\Controllers\Controller;
 use App\Models\Periksa;
+use App\Notifications\BuktiPembayaranDiunggahNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
@@ -62,7 +63,11 @@ class PembayaranController extends Controller
                 'tgl_pembayaran' => now(),
             ]);
 
-            // Di Tahap 5 nanti, notifikasi ke dokter akan dipanggil di sini
+            // Kirim Notifikasi ke Dokter yang memeriksa
+            $dokter = $periksa->daftarPoli?->jadwalPeriksa?->dokter;
+            if ($dokter) {
+                $dokter->notify(new BuktiPembayaranDiunggahNotification($periksa));
+            }
         }
 
         return redirect()->route('pasien.pembayaran.index')

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Periksa;
+use App\Notifications\PembayaranDiverifikasiNotification;
 use Illuminate\Http\Request;
 
 class VerifikasiPembayaranController extends Controller
@@ -30,7 +31,11 @@ class VerifikasiPembayaranController extends Controller
             'tgl_verifikasi' => now(),
         ]);
 
-        // Di Tahap 5 nanti, notifikasi ke pasien akan dipanggil di sini
+        // Kirim Notifikasi ke Pasien bahwa pembayaran telah lunas
+        $pasien = $periksa->daftarPoli?->pasien;
+        if ($pasien) {
+            $pasien->notify(new PembayaranDiverifikasiNotification($periksa));
+        }
 
         return redirect()->route('admin.pembayaran.index')
             ->with('success', 'Pembayaran berhasil diverifikasi. Status tagihan kini lunas.');

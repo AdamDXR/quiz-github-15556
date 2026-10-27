@@ -20,6 +20,7 @@ use App\Http\Controllers\Pasien\PoliController;
 use App\Http\Controllers\Pasien\RiwayatController;
 use App\Http\Controllers\Pasien\PembayaranController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\NotificationController;
 
 
 Route::get('/', function () {
@@ -85,5 +86,9 @@ Route::middleware(['auth', 'role:pasien'])->prefix('pasien')->group(function () 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 });
 
