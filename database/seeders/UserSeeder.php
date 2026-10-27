@@ -25,13 +25,15 @@ class UserSeeder extends Seeder
                 'nama' => 'Dokter',
                 'email' => 'dokter@gmail.com',
                 'password' => Hash::make('dokter'),
-                'role' => 'dokter'
+                'role' => 'dokter',
+                'id_poli' => 1,
             ],
             [
                 'nama' => 'Pasien',
                 'email' => 'pasien@gmail.com',
                 'password' => Hash::make('pasien'),
-                'role' => 'pasien'
+                'role' => 'pasien',
+                'no_rm' => '202610-003',
             ]
         ];
 

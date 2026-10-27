@@ -39,7 +39,7 @@
                                 Nomor Rekam Medis
                             </label>
 
-                            <input type="text" value="{{ $user->no_rm }}"
+                            <input type="text" value="{{ $user->no_rm ?? '-' }}"
                                 class="w-full border-2 rounded-lg p-2 bg-gray-100" disabled>
                         </div>
 
@@ -49,10 +49,10 @@
                                 Pilih Poli
                             </label>
 
-                            <select name="id_poli" id="poliSelect" class="w-full border-2 rounded-lg p-2">
+                            <select name="id_poli" id="poliSelect" class="w-full border-2 rounded-lg p-2" required>
                                 <option value="">-- Pilih Poli --</option>
                                 @foreach ($polis as $poli)
-                                <option value="{{ $poli->id }}">
+                                <option value="{{ $poli->id }}" {{ old('id_poli') == $poli->id ? 'selected' : '' }}>
                                     {{ $poli->nama_poli }}
                                 </option>
                                 @endforeach
@@ -66,14 +66,15 @@
                                 Pilih Jadwal Periksa
                             </label>
 
-                            <select name="id_jadwal" id="jadwalSelect" class="w-full border-2 rounded-lg p-2">
+                            <select name="id_jadwal" id="jadwalSelect" class="w-full border-2 rounded-lg p-2" required>
                                 <option value="">-- Pilih Jadwal --</option>
 
                                 @foreach ($jadwals as $jadwal)
-                                <option value="{{ $jadwal->id }}" data-poli="{{ $jadwal->dokter->id_poli }}">
+                                <option value="{{ $jadwal->id }}" data-poli="{{ $jadwal->dokter->id_poli ?? '' }}"
+                                    {{ old('id_jadwal') == $jadwal->id ? 'selected' : '' }}>
                                     {{ $jadwal->hari }}
-                                    {{ $jadwal->jam_mulai }} - {{ $jadwal->jam_selesai }}
-                                    Dr. {{ $jadwal->dokter->nama ?? '--' }}
+                                    ({{ $jadwal->jam_mulai }} - {{ $jadwal->jam_selesai }})
+                                    - Dr. {{ $jadwal->dokter->nama ?? '--' }}
                                 </option>
                                 @endforeach
 
@@ -86,7 +87,7 @@
                                 Keluhan
                             </label>
                             <textarea name="keluhan" rows="3" class="w-full border-2 rounded-lg p-2"
-                                placeholder="Tulis keluhan anda..."></textarea>
+                                placeholder="Tulis keluhan anda...">{{ old('keluhan') }}</textarea>
                         </div>
 
                         <div class="flex justify-end">
@@ -105,27 +106,50 @@
     @push('scripts')
     <script>
         document.addEventListener("DOMContentLoaded", function(){
+            const poliSelect = document.getElementById("poliSelect");
+            const jadwalSelect = document.getElementById("jadwalSelect");
+            const jadwalOptions = Array.from(jadwalSelect.querySelectorAll("option"));
 
-    const poliSelect = document.getElementById("poliSelect")
-    const jadwalSelect = document.getElementById("jadwalSelect")
-    const jadwalOptions = jadwalSelect.querySelectorAll("option")
+            function filterJadwal(keepSelectedValue = false) {
+                const poliId = poliSelect.value;
+                const currentJadwalValue = jadwalSelect.value;
 
-    poliSelect.addEventListener("change", function(){
-        let poliId = this.value
-        jadwalOptions.forEach(option => {
-            if(option.value === ""){
-                option.style.display = "block"
-                return
+                jadwalOptions.forEach(option => {
+                    if (option.value === "") {
+                        option.hidden = false;
+                        option.style.display = "block";
+                        return;
+                    }
+                    if (poliId && option.dataset.poli === poliId) {
+                        option.hidden = false;
+                        option.style.display = "block";
+                    } else {
+                        option.hidden = true;
+                        option.style.display = "none";
+                    }
+                });
+
+                if (!keepSelectedValue) {
+                    jadwalSelect.value = "";
+                } else {
+                    const selectedOption = jadwalOptions.find(opt => opt.value === currentJadwalValue);
+                    if (selectedOption && (selectedOption.dataset.poli !== poliId && selectedOption.value !== "")) {
+                        jadwalSelect.value = "";
+                    }
+                }
             }
-            if(option.dataset.poli === poliId){
-                option.style.display = "block"
-            }else{
-                option.style.display = "none"
+
+            poliSelect.addEventListener("change", function(){
+                filterJadwal(false);
+            });
+
+            // Jalankan filter saat halaman pertama kali dimuat
+            if (poliSelect.value) {
+                filterJadwal(true);
+            } else {
+                filterJadwal(false);
             }
-        })
-        jadwalSelect.value = ""
-    })
-        })
+        });
     </script>
     @endpush
 </x-layouts.app>

@@ -36,10 +36,11 @@ class PoliController extends Controller
         $jumlahSudahDaftar = DaftarPoli::where('id_jadwal', $request->id_jadwal)->count();
 
         DaftarPoli::create([
-            'id_pasien' => $request->id_pasien,
+            'id_pasien' => Auth::id() ?? $request->id_pasien,
             'id_jadwal' => $request->id_jadwal,
-            'keluhan' => $request->keluhan,
+            'keluhan' => $request->keluhan ?? '-',
             'no_antrian' => $jumlahSudahDaftar + 1,
+            'status' => 'menunggu',
         ]);
 
         return redirect()
