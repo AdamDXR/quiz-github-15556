@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dokter;
 
+use App\Events\AntrianUpdated;
 use App\Http\Controllers\Controller;
 use App\Models\DaftarPoli;
 use App\Models\DetailPeriksa;
@@ -20,10 +21,38 @@ class PeriksaPasienController extends Controller
             ->whereHas('jadwalPeriksa', function ($query) use ($dokterId) {
                 $query->where('id_dokter', $dokterId);
             })
+            ->orderByRaw("CASE WHEN status = 'sedang_dilayani' THEN 1 WHEN status = 'menunggu' THEN 2 ELSE 3 END")
             ->orderBy('no_antrian')
             ->get();
 
         return view('dokter.periksa-pasien.index', compact('daftarPasien'));
+    }
+
+    public function panggil($id)
+    {
+        $dokterId = Auth::id();
+        $daftarPoli = DaftarPoli::whereHas('jadwalPeriksa', function ($query) use ($dokterId) {
+            $query->where('id_dokter', $dokterId);
+        })->with(['jadwalPeriksa.dokter.poli', 'pasien'])->findOrFail($id);
+
+        // Reset antrian lain yang sebelumnya berstatus sedang_dilayani pada jadwal ini
+        DaftarPoli::where('id_jadwal', $daftarPoli->id_jadwal)
+            ->where('status', 'sedang_dilayani')
+            ->where('id', '!=', $id)
+            ->update(['status' => 'menunggu']);
+
+        $daftarPoli->update(['status' => 'sedang_dilayani']);
+
+        // Pancarkan event real-time WebSocket
+        try {
+            broadcast(new AntrianUpdated($daftarPoli));
+        } catch (\Throwable $e) {
+            // Reverb fallback jika offline saat presentasi
+        }
+
+        return redirect()->route('periksa-pasien.index')
+            ->with('message', 'Nomor antrian ' . $daftarPoli->no_antrian . ' (' . ($daftarPoli->pasien->nama ?? 'Pasien') . ') berhasil dipanggil.')
+            ->with('type', 'success');
     }
 
     public function create($id)
@@ -55,6 +84,18 @@ class PeriksaPasienController extends Controller
                     'id_periksa' => $periksa->id,
                     'id_obat' => $idObat,
                 ]);
+            }
+        }
+
+        // Tandai antrian pendaftaran selesai
+        $daftarPoli = DaftarPoli::with(['jadwalPeriksa.dokter.poli', 'pasien'])->find($request->id_daftar_poli);
+        if ($daftarPoli) {
+            $daftarPoli->update(['status' => 'selesai']);
+
+            try {
+                broadcast(new AntrianUpdated($daftarPoli));
+            } catch (\Throwable $e) {
+                // Reverb fallback
             }
         }
 

@@ -33,6 +33,23 @@ class PoliController extends Controller
             'id_pasien' => 'required|exists:users,id',
         ]);
 
+        $pasienId = Auth::id() ?? $request->id_pasien;
+
+        // Constraint PDF: Pasien tidak dapat mendaftar ke dua poli sekaligus.
+        // Pasien hanya dapat mendaftar kembali setelah proses pemeriksaan selesai.
+        $antrianAktif = DaftarPoli::where('id_pasien', $pasienId)
+            ->whereIn('status', ['menunggu', 'sedang_dilayani'])
+            ->with('jadwalPeriksa.dokter.poli')
+            ->first();
+
+        if ($antrianAktif) {
+            $namaPoli = $antrianAktif->jadwalPeriksa->dokter->poli->nama_poli ?? 'Poli';
+            return redirect()
+                ->back()
+                ->with('message', "Anda masih memiliki antrian aktif (No. {$antrianAktif->no_antrian}) di {$namaPoli}. Harap selesaikan proses pemeriksaan terlebih dahulu sebelum mendaftar kembali.")
+                ->with('type', 'danger');
+        }
+
         $jumlahSudahDaftar = DaftarPoli::where('id_jadwal', $request->id_jadwal)->count();
 
         DaftarPoli::create([
